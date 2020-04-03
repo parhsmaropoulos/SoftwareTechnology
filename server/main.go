@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -63,12 +64,33 @@ func main() {
 	client := router.Group("/client")
 	{
 		client.GET("/", GetClientMainPage)
+		client.GET("/:email", GetClient)
 		// client.GET("/manageProfile", ManageProfile)
 		// client.POST("/manageProfile", ManagedProfile)
 		// client.GET("/project/:id", ViewProject)
 		// client.POST("/createProject", CreateProject)
 	}
 	router.Run()
+}
+
+func GetClient(c *gin.Context) {
+	if c.Request.Method != "GET" {
+		fmt.Println("Only get here or get out!")
+	}
+	mail := c.Param("email")
+
+	result := Client{}
+
+	err := users.FindOne(context.TODO(), bson.M{{"email", mail}}).Decode(result)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Email not found"})
+	}
+	c.JSON(200, gin.H{
+		"message": "user found",
+		"data":    result,
+	})
+
 }
 
 func CreateProfile(c *gin.Context) {
@@ -89,6 +111,8 @@ func CreateProfile(c *gin.Context) {
 	link := c.PostForm("link")
 
 	cl := Client{email, usn, pass, name, surn, gender, time.Now(), []byte{0}, desc, link}
+
+	users.InsertOne(context.Background(), bson.M{"client": cl})
 	c.JSON(200, gin.H{
 		"message": "User created successfully",
 		"data":    cl,
