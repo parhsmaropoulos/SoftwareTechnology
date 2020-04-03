@@ -79,16 +79,21 @@ func GetClient(c *gin.Context) {
 	}
 	mail := c.Param("email")
 
-	result := Client{}
+	fmt.Println(mail)
 
-	err := users.FindOne(context.TODO(), bson.M{{"email", mail}}).Decode(result)
+	client := Client{}
 
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Email not found"})
-	}
+	res := users.FindOne(context.Background(), bson.M{"email": mail}).Decode(&client)
+
+	fmt.Println(res)
+	fmt.Println(client)
+
+	// if err != nil {
+	// 	c.JSON(http.StatusNotFound, gin.H{"message": "Email not found"})
+	// }
 	c.JSON(200, gin.H{
 		"message": "user found",
-		"data":    result,
+		"data":    client,
 	})
 
 }
@@ -112,7 +117,7 @@ func CreateProfile(c *gin.Context) {
 
 	cl := Client{email, usn, pass, name, surn, gender, time.Now(), []byte{0}, desc, link}
 
-	users.InsertOne(context.Background(), bson.M{"client": cl})
+	users.InsertOne(context.Background(), bson.M{}(cl))
 	c.JSON(200, gin.H{
 		"message": "User created successfully",
 		"data":    cl,
