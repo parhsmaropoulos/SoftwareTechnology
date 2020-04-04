@@ -104,6 +104,7 @@ func CreateProfile(c *gin.Context) {
 		return
 	}
 
+	// Store client
 	email := c.PostForm("email")
 	usn := c.PostForm("username")
 	pass := c.PostForm("password")
@@ -117,7 +118,7 @@ func CreateProfile(c *gin.Context) {
 
 	cl := Client{email, usn, pass, name, surn, gender, time.Now(), []byte{0}, desc, link}
 
-	users.InsertOne(context.Background(), bson.M{}(cl))
+	users.InsertOne(context.Background(), cl)
 	c.JSON(200, gin.H{
 		"message": "User created successfully",
 		"data":    cl,
